@@ -23,7 +23,7 @@ from mutual_fund_ml.linear_models import fit_naive_baseline, fit_ols_statsmodels
 from mutual_fund_ml.tree_models import fit_decision_tree_cv
 from mutual_fund_ml.evaluation import calculate_regression_metrics
 from mutual_fund_ml.reporting import save_model_comparison, save_predictions_and_residuals
-from mutual_fund_ml.panel_diagnostics import run_panel_diagnostics, save_panel_diagnostics, format_panel_diagnostics
+from mutual_fund_ml.panel_diagnostics import run_panel_diagnostics, save_panel_diagnostics, format_panel_diagnostics, compute_vif_table, save_vif_table
 
 logger = setup_logger("run_pipeline", log_file="outputs/pipeline.log")
 
@@ -298,6 +298,12 @@ def run_model(mode="explanatory"):
         X_full_ols = sm.add_constant(df_full_ols)
         y_full_ols = df_full_feat["Average"]
         groups = df_full_feat["Scheme Name"]
+
+        # Compute and save per-feature VIF diagnostics for the raw numerical explanatory block
+        vif_table = compute_vif_table(df_full_feat[active_numerical])
+        vif_path = tables_dir / "explanatory_vif_diagnostics.txt"
+        save_vif_table(vif_table, vif_path)
+        logger.info(f"Explanatory VIF diagnostics saved to: {vif_path}")
 
         logger.info("Fitting Pooled OLS with Category & Month dummy fixed effects and standard errors clustered by Scheme Name...")
         ols_robust = sm.OLS(y_full_ols, X_full_ols).fit(cov_type='cluster', cov_kwds={'groups': groups})

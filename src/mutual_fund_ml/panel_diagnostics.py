@@ -101,3 +101,48 @@ def save_panel_diagnostics(results: Dict[str, Any], output_path: Path) -> None:
     report_str = format_panel_diagnostics(results)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(report_str)
+
+def compute_vif_table(df_numeric: pd.DataFrame) -> pd.DataFrame:
+    """Computes per-feature Variance Inflation Factors for a numeric design matrix.
+
+    Only continuous numerical features should be passed in (no constant, no
+    one-hot dummy columns), so the resulting VIFs isolate structural
+    multicollinearity among the raw financial/concentration features rather
+    than reflecting dummy-encoding artifacts.
+    """
+    from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+    X = df_numeric.astype(float).copy()
+    X.insert(0, "const", 1.0)
+
+    vif_rows = [
+        {"feature": col, "VIF": variance_inflation_factor(X.values, i)}
+        for i, col in enumerate(X.columns) if col != "const"
+    ]
+    df_vif = pd.DataFrame(vif_rows).sort_values("VIF", ascending=False).reset_index(drop=True)
+    return df_vif
+
+def format_vif_table(df_vif: pd.DataFrame) -> str:
+    """Formats a VIF table into a readable report string."""
+    lines = [
+        "EXPLANATORY OLS - VARIANCE INFLATION FACTOR (VIF) DIAGNOSTICS",
+        "=" * 63,
+        "",
+        f"{'Feature':<55}{'VIF':>8}",
+        "-" * 63,
+    ]
+    for _, row in df_vif.iterrows():
+        lines.append(f"{row['feature']:<55}{row['VIF']:>8.3f}")
+    lines.append("")
+    lines.append("Notes:")
+    lines.append("[1] VIF > 10 conventionally indicates high multicollinearity.")
+    lines.append("[2] Computed on raw numerical features only (constant and")
+    lines.append("    Category/Month dummy columns excluded).")
+    return "\n".join(lines) + "\n"
+
+def save_vif_table(df_vif: pd.DataFrame, output_path: Path) -> None:
+    """Saves a VIF diagnostics report to a file."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    report_str = format_vif_table(df_vif)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(report_str)
