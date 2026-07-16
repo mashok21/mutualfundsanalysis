@@ -1,0 +1,135 @@
+# Project Configuration for Mutual Fund ML Project
+
+# 1. Project Path Configurations
+paths:
+  raw_data_dir: "data/raw"
+  interim_data_dir: "data/interim"
+  processed_data_dir: "data/processed"
+  artifact_dir: "artifacts"
+  output_dir: "outputs"
+
+  raw_filename: "20260622_Scheme_MF_PCA_Rawdata.xlsx"
+  cleaned_filename: "cleaned_dataset.csv"
+  processed_filename: "modelling_dataset.csv"
+
+# 2. Schema and Column Configurations
+schema:
+  target_col: "Average"
+  id_cols:
+    - "Scheme Code"
+    - "Scheme Name"
+  date_col: "TS_Month End"
+  categorical_cols:
+    - "Category"
+
+  # List of 44 variables used in PCA
+  pca_variables:
+    - "TS_Total Equity Stocks Count"
+    - "TS_Top 1 Stocks (%)"
+    - "TS_Top 3 Stocks (%)"
+    - "TS_Top 10 Stocks (%)"
+    - "TS_Top 20 Stocks (%)"
+    - "TS_Top 30 Stocks (%)"
+    - "TS_Top 50 Stocks (%)"
+    - "TS_Total Sector Count"
+    - "TS_Top 1 Sectors (%)"
+    - "TS_Top 3 Sectors (%)"
+    - "TS_Top 5 Sectors (%)"
+    - "TS_Top 10 Sectors (%)"
+    - "AUMT_AUM"
+    - "ATAL_Cash & Cash Equivalents and Net Assets (%)"
+    - "MCA_Large Cap (%)"
+    - "MCA_Mid Cap (%)"
+    - "MCA_Small Cap (%)"
+    - "ER_Scheme PBV (x)"
+    - "ER_Scheme Dividend Yield (%)"
+    - "ER_Scheme PE (x)"
+    - "HHI"
+    - "SCI"
+    - "AALC_Equity Allocation (%)"
+    - "Standard Deviation"
+    - "Semi Standard Deviation"
+    - "Beta (Slope)"
+    - "Correlation"
+    - "Beta (Correlation)"
+    - "R-Squared"
+    - "Treynor"
+    - "Fama"
+    - "Sharpe"
+    - "Jensen`s Alpha"
+    - "Sortino"
+    - "Return due to Improper"
+    - "Return due to Selectivity"
+    - "Downside Probability"
+    - "Down Side Risk"
+    - "Tracking Error"
+    - "Information Ratio"
+    - "SD Annualised"
+    - "Concentration Sectoral_Avg Exposure"
+    - "Concentration Company_Avg Exposure"
+
+  # Variables to be excluded from modeling (like leakage variables or non-features)
+  excluded_from_modeling:
+    - "Scheme Code"
+    - "Scheme Name"
+    - "TS_Month End"
+    - "Category"
+    - "Return due to Selectivity"
+    - "Return due to Improper"
+    - "Standard Deviation"
+    - "Semi Standard Deviation"
+    - "Beta (Slope)"
+    - "Correlation"
+    - "Beta (Correlation)"
+    - "R-Squared"
+    - "Treynor"
+    - "Fama"
+    - "Sharpe"
+    - "Jensen`s Alpha"
+    - "Sortino"
+    - "Downside Probability"
+    - "Down Side Risk"
+    - "Tracking Error"
+    - "Information Ratio"
+    - "SD Annualised"
+
+# 3. Model Parameters and Splitting
+parameters:
+  random_seed: 42
+  test_size: 0.2
+  cv_folds: 5
+
+  # Chronological split boundaries (format YYYYMM)
+  chronological_split:
+    train_end: 202412
+    val_end: 202512
+    test_end: 202604
+
+  # PCA parameters
+  pca_variance_threshold: 0.80
+  pca_n_components: 11
+
+  # Clustering parameters
+  candidate_clusters:
+    - 2
+    - 3
+    - 4
+    - 5
+  optimal_k: 3
+
+# 4. Supervised Model Hyperparameters
+models:
+  linear:
+    alphas: [0.01, 0.1, 1.0, 10.0, 100.0]
+    l1_ratios: [0.1, 0.5, 0.7, 0.9]
+  tree:
+    max_depth: 4
+    min_samples_split: 5
+  rf:
+    n_estimators: 100
+    max_depth: 5
+    min_samples_split: 5
+  gb:
+    n_estimators: 100
+    learning_rate: 0.1
+    max_depth: 3
