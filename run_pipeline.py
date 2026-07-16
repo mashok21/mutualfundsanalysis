@@ -265,7 +265,7 @@ def run_model(mode="explanatory"):
         scores = pca.transform(df_std_num)
         df_scores = pd.DataFrame(scores, columns=[f"PC{i+1}" for i in range(config["parameters"]["pca_n_components"])])
         df_scores.insert(0, "Scheme Name", df_raw["Scheme Name"])
-        save_pca_artifacts(pca, df_loadings, df_variance, df_scores)
+        save_pca_artifacts(pca, df_loadings, df_variance, df_scores, mode=mode)
 
         # 2. Run Self-Contained Clustering
         logger.info("Running clustering analysis natively...")
@@ -404,7 +404,7 @@ def run_model(mode="explanatory"):
         scores = pca.transform(df_std_num)
         df_scores = pd.DataFrame(scores, columns=[f"PC{i+1}" for i in range(config["parameters"]["pca_n_components"])])
         df_scores.insert(0, "Scheme Name", df_std_sorted["Scheme Name"])
-        save_pca_artifacts(pca, df_loadings, df_variance, df_scores)
+        save_pca_artifacts(pca, df_loadings, df_variance, df_scores, mode=mode)
 
         # 2. Run Self-Contained Clustering
         logger.info("Running clustering analysis natively...")
